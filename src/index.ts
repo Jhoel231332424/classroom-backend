@@ -2,6 +2,8 @@ import express from 'express';
 import subjectsRouter from "./routes/subjects";
 import cors from "cors";
 import securityMiddleware from "./middleware/security";
+import {toNodeHandler} from "better-auth/node";
+import {auth} from "./lib/auth";
 
 const app = express();
 const port = 8000;
@@ -17,7 +19,7 @@ app.use(cors({
 app.use('/api/subjects', subjectsRouter)
 
 app.use (securityMiddleware);
-
+app.all("/api/auth/*splat", toNodeHandler(auth));
 app.get('/', (req, res) => {
   res.json({ message: 'Hello from Classroom Backend!' });
 });

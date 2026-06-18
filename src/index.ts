@@ -16,10 +16,11 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }))
-app.use('/api/subjects', subjectsRouter)
 
 app.use (securityMiddleware);
 app.all("/api/auth/*splat", toNodeHandler(auth));
+
+app.use('/api/subjects', subjectsRouter)
 app.get('/', (req, res) => {
   res.json({ message: 'Hello from Classroom Backend!' });
 });

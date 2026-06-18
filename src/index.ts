@@ -1,10 +1,12 @@
 import cors from "cors";
 import express from "express";
 import { toNodeHandler } from "better-auth/node";
+import "dotenv/config";
 
 import subjectsRouter from "./routes/subjects.js";
 import securityMiddleware from "./middleware/security.js";
 import { auth } from "./lib/auth.js";
+
 
 const app = express();
 const PORT = 8000;

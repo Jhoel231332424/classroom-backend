@@ -1,10 +1,119 @@
 import { Router } from "express";
 import { db } from "../db/index.js";
 import { products, purchases } from "../db/schema/app.js";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, desc } from "drizzle-orm";
 import crypto from "node:crypto";
 
 const router = Router();
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Purchase:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *         productoId:
+ *           type: string
+ *         proveedorId:
+ *           type: string
+ *         costoTotalCaja:
+ *           type: number
+ *         unidadesPorCaja:
+ *           type: integer
+ *         cantidadCajas:
+ *           type: integer
+ *         costoUnitarioCalculado:
+ *           type: number
+ *         fechaIngreso:
+ *           type: string
+ *           format: date-time
+ */
+
+/**
+ * @swagger
+ * /api/purchases:
+ *   get:
+ *     summary: Obtener el historial de compras (ingresos de mercadería)
+ *     tags: [Purchases]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *     responses:
+ *       200:
+ *         description: Lista de compras
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Purchase'
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                     total:
+ *                       type: integer
+ *                     totalPages:
+ *                       type: integer
+ */
+router.get("/", async (req, res) => {
+    try {
+        const { page = 1, limit = 10 } = req.query;
+        const currentPage = Math.max(1, Number(page));
+        const limitPerPage = Math.max(1, Number(limit));
+        const offset = (currentPage - 1) * limitPerPage;
+
+        const countResult = await db
+            .select({ count: sql<number>`count(*)` })
+            .from(purchases);
+
+        const totalCount = Number(countResult[0]?.count ?? 0);
+
+        const data = await db
+            .select()
+            .from(purchases)
+            .orderBy(desc(purchases.fechaIngreso))
+            .limit(limitPerPage)
+            .offset(offset);
+
+        // Convertir strings decimales a números
+        const formattedData = data.map(p => ({
+            ...p,
+            costoTotalCaja: Number(p.costoTotalCaja),
+            costoUnitarioCalculado: Number(p.costoUnitarioCalculado),
+        }));
+
+        res.json({
+            data: formattedData,
+            pagination: {
+                page: currentPage,
+                limit: limitPerPage,
+                total: totalCount,
+                totalPages: Math.ceil(totalCount / limitPerPage),
+            },
+        });
+    } catch (error) {
+        console.error("Error en GET /api/purchases:", error);
+        res.status(500).json({ error: "Error interno del servidor" });
+    }
+});
 
 /**
  * @swagger

@@ -91,6 +91,67 @@
       }
     },
     "/api/sales": {
+      "get": {
+        "summary": "Obtener el historial de ventas con sus detalles",
+        "tags": [
+          "Sales"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de ventas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Sale"
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer"
+                        },
+                        "limit": {
+                          "type": "integer"
+                        },
+                        "total": {
+                          "type": "integer"
+                        },
+                        "totalPages": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "summary": "Registra una nueva venta con sus detalles",
         "tags": [
@@ -155,6 +216,67 @@
       }
     },
     "/api/purchases": {
+      "get": {
+        "summary": "Obtener el historial de compras (ingresos de mercadería)",
+        "tags": [
+          "Purchases"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de compras",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Purchase"
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer"
+                        },
+                        "limit": {
+                          "type": "integer"
+                        },
+                        "total": {
+                          "type": "integer"
+                        },
+                        "totalPages": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "summary": "Registra un ingreso de mercadería (compra)",
         "tags": [
@@ -684,6 +806,106 @@
             ]
           },
           "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SaleDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "ventaId": {
+            "type": "string"
+          },
+          "productoId": {
+            "type": "string"
+          },
+          "cantidad": {
+            "type": "integer"
+          },
+          "precioUnitario": {
+            "type": "number"
+          },
+          "subtotal": {
+            "type": "number"
+          }
+        }
+      },
+      "Sale": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "modoVenta": {
+            "type": "string",
+            "enum": [
+              "local",
+              "viaje"
+            ]
+          },
+          "montoSugerido": {
+            "type": "number"
+          },
+          "montoCobrado": {
+            "type": "number"
+          },
+          "diferenciaRedondeo": {
+            "type": "number"
+          },
+          "costoRealVenta": {
+            "type": "number"
+          },
+          "utilidadNeta": {
+            "type": "number"
+          },
+          "estado": {
+            "type": "string",
+            "enum": [
+              "pendiente",
+              "confirmada"
+            ]
+          },
+          "fechaVenta": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "details": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SaleDetail"
+            }
+          }
+        }
+      },
+      "Purchase": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "productoId": {
+            "type": "string"
+          },
+          "proveedorId": {
+            "type": "string"
+          },
+          "costoTotalCaja": {
+            "type": "number"
+          },
+          "unidadesPorCaja": {
+            "type": "integer"
+          },
+          "cantidadCajas": {
+            "type": "integer"
+          },
+          "costoUnitarioCalculado": {
+            "type": "number"
+          },
+          "fechaIngreso": {
             "type": "string",
             "format": "date-time"
           }

@@ -5,9 +5,13 @@ import "dotenv/config";
 import swaggerJsDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import usersRouter from "./routes/user.js";
-import classesRouter from "./routes/classes.js";
-
-import subjectsRouter from "./routes/subjects.js";
+// import classesRouter from "./routes/classes.js";
+// import subjectsRouter from "./routes/subjects.js";
+import purchasesRouter from "./routes/purchases.js";
+import salesRouter from "./routes/sales.js";
+import productsRouter from "./routes/products.js";
+import providersRouter from "./routes/providers.js";
+import dashboardRouter from "./routes/dashboard.js";
 import securityMiddleware from "./middleware/security.js";
 import { auth } from "./lib/auth.js";
 
@@ -49,9 +53,14 @@ app.use(express.json());
 
 app.use(securityMiddleware);
 
-app.use("/api/subjects", subjectsRouter);
+// app.use("/api/subjects", subjectsRouter);
 app.use("/api/users", usersRouter);
-app.use("/api/classes", classesRouter);
+// app.use("/api/classes", classesRouter);
+app.use("/api/purchases", purchasesRouter);
+app.use("/api/sales", salesRouter);
+app.use("/api/products", productsRouter);
+app.use("/api/providers", providersRouter);
+app.use("/api/dashboard", dashboardRouter);
 // app.use("/api/departments", departmentsRouter);
 // app.use("/api/stats", statsRouter);
 // app.use("/api/enrollments", enrollmentsRouter);

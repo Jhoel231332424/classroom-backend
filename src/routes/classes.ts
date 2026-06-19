@@ -7,7 +7,6 @@ import { classes, departments, enrollments, subjects, user } from "../db/schema/
 const router = express.Router();
 
 /**
- * @swagger
  * components:
  *   schemas:
  *     Class:
@@ -35,7 +34,6 @@ const router = express.Router();
  */
 
 /**
- * @swagger
  * /api/classes:
  *   get:
  *     summary: Obtener todas las clases

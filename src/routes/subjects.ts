@@ -7,7 +7,6 @@ import {subjects, departments} from "../db/schema/index.js";
 const router = express.Router();
 
 /**
- * @swagger
  * components:
  *   schemas:
  *     Subject:
@@ -27,7 +26,6 @@ const router = express.Router();
  */
 
 /**
- * @swagger
  * /api/subjects:
  *   get:
  *     summary: Obtener todas las asignaturas

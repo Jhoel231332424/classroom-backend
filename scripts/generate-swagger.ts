@@ -6,9 +6,9 @@ const swaggerOptions = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "Classroom API",
+      title: "Sistema de Inventario Comercial API",
       version: "1.0.0",
-      description: "API para el sistema de gestión de aulas",
+      description: "API para la gestión de inventario, compras y ventas",
     },
     servers: [
       {
@@ -16,7 +16,7 @@ const swaggerOptions = {
       },
     ],
   },
-  apis: ["./src/routes/*.ts"],
+  apis: ["./src/routes/*.ts", "./src/routes/*.js"],
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);

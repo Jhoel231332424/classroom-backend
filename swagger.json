@@ -1,9 +1,9 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "Classroom API",
+    "title": "Sistema de Inventario Comercial API",
     "version": "1.0.0",
-    "description": "API para el sistema de gestión de aulas"
+    "description": "API para la gestión de inventario, compras y ventas"
   },
   "servers": [
     {
@@ -90,11 +90,128 @@
         }
       }
     },
-    "/api/subjects": {
-      "get": {
-        "summary": "Obtener todas las asignaturas",
+    "/api/sales": {
+      "post": {
+        "summary": "Registra una nueva venta con sus detalles",
         "tags": [
-          "Subjects"
+          "Sales"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "modoVenta",
+                  "detalles"
+                ],
+                "properties": {
+                  "modoVenta": {
+                    "type": "string",
+                    "enum": [
+                      "local",
+                      "viaje"
+                    ]
+                  },
+                  "detalles": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "productoId",
+                        "cantidad",
+                        "precioCobrado"
+                      ],
+                      "properties": {
+                        "productoId": {
+                          "type": "string"
+                        },
+                        "cantidad": {
+                          "type": "integer"
+                        },
+                        "precioCobrado": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Venta registrada exitosamente"
+          },
+          "400": {
+            "description": "Stock insuficiente o datos inválidos"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+    "/api/purchases": {
+      "post": {
+        "summary": "Registra un ingreso de mercadería (compra)",
+        "tags": [
+          "Purchases"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "productoId",
+                  "proveedorId",
+                  "costoTotalCaja",
+                  "unidadesPorCaja",
+                  "cantidadCajas"
+                ],
+                "properties": {
+                  "productoId": {
+                    "type": "string"
+                  },
+                  "proveedorId": {
+                    "type": "string"
+                  },
+                  "costoTotalCaja": {
+                    "type": "number"
+                  },
+                  "unidadesPorCaja": {
+                    "type": "integer"
+                  },
+                  "cantidadCajas": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Compra registrada exitosamente"
+          },
+          "400": {
+            "description": "Error en los datos enviados"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+    "/api/providers": {
+      "get": {
+        "summary": "Obtener todos los proveedores con paginación",
+        "tags": [
+          "Providers"
         ],
         "parameters": [
           {
@@ -103,15 +220,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Buscar por nombre o código"
-          },
-          {
-            "in": "query",
-            "name": "department",
-            "schema": {
-              "type": "string"
-            },
-            "description": "Filtrar por nombre de departamento"
+            "description": "Buscar por nombre"
           },
           {
             "in": "query",
@@ -132,7 +241,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Lista de asignaturas",
+            "description": "Lista de proveedores",
             "content": {
               "application/json": {
                 "schema": {
@@ -141,7 +250,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/Subject"
+                        "$ref": "#/components/schemas/Provider"
                       }
                     },
                     "pagination": {
@@ -167,13 +276,107 @@
             }
           }
         }
+      },
+      "post": {
+        "summary": "Crear un nuevo proveedor",
+        "tags": [
+          "Providers"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "nombre"
+                ],
+                "properties": {
+                  "nombre": {
+                    "type": "string"
+                  },
+                  "telefono": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Proveedor creado"
+          }
+        }
       }
     },
-    "/api/classes": {
-      "get": {
-        "summary": "Obtener todas las clases",
+    "/api/providers/{id}": {
+      "put": {
+        "summary": "Actualizar un proveedor existente",
         "tags": [
-          "Classes"
+          "Providers"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nombre": {
+                    "type": "string"
+                  },
+                  "telefono": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Proveedor actualizado"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Eliminar un proveedor",
+        "tags": [
+          "Providers"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Proveedor eliminado"
+          }
+        }
+      }
+    },
+    "/api/products": {
+      "get": {
+        "summary": "Obtener todos los productos con paginación",
+        "tags": [
+          "Products"
         ],
         "parameters": [
           {
@@ -182,23 +385,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Buscar por nombre o código de invitación"
-          },
-          {
-            "in": "query",
-            "name": "subject",
-            "schema": {
-              "type": "string"
-            },
-            "description": "Filtrar por nombre de asignatura"
-          },
-          {
-            "in": "query",
-            "name": "teacher",
-            "schema": {
-              "type": "string"
-            },
-            "description": "Filtrar por nombre de profesor"
+            "description": "Buscar por nombre"
           },
           {
             "in": "query",
@@ -219,7 +406,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Lista de clases",
+            "description": "Lista de productos",
             "content": {
               "application/json": {
                 "schema": {
@@ -228,7 +415,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/Class"
+                        "$ref": "#/components/schemas/Product"
                       }
                     },
                     "pagination": {
@@ -252,6 +439,161 @@
                 }
               }
             }
+          }
+        }
+      },
+      "post": {
+        "summary": "Crear un nuevo producto",
+        "tags": [
+          "Products"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "nombre",
+                  "margenLocal",
+                  "margenViaje",
+                  "costoUnitarioReal"
+                ],
+                "properties": {
+                  "nombre": {
+                    "type": "string"
+                  },
+                  "margenLocal": {
+                    "type": "number"
+                  },
+                  "margenViaje": {
+                    "type": "number"
+                  },
+                  "costoUnitarioReal": {
+                    "type": "number"
+                  },
+                  "stockDisponible": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Producto creado"
+          }
+        }
+      }
+    },
+    "/api/products/{id}": {
+      "put": {
+        "summary": "Actualizar un producto existente",
+        "tags": [
+          "Products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nombre": {
+                    "type": "string"
+                  },
+                  "margenLocal": {
+                    "type": "number"
+                  },
+                  "margenViaje": {
+                    "type": "number"
+                  },
+                  "costoUnitarioReal": {
+                    "type": "number"
+                  },
+                  "stockDisponible": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Producto actualizado"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Eliminar un producto",
+        "tags": [
+          "Products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Producto eliminado"
+          }
+        }
+      }
+    },
+    "/api/dashboard/daily": {
+      "get": {
+        "summary": "Obtiene métricas financieras del día y valor total del inventario",
+        "tags": [
+          "Dashboard"
+        ],
+        "responses": {
+          "200": {
+            "description": "Métricas financieras calculadas exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ingresos_brutos": {
+                      "type": "number"
+                    },
+                    "utilidad_neta_dia": {
+                      "type": "number"
+                    },
+                    "cantidad_operaciones": {
+                      "type": "integer"
+                    },
+                    "fuga_por_redondeos": {
+                      "type": "number"
+                    },
+                    "capital_invertido": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor"
           }
         }
       }
@@ -285,55 +627,46 @@
           }
         }
       },
-      "Subject": {
+      "Provider": {
         "type": "object",
         "properties": {
           "id": {
             "type": "string"
           },
-          "name": {
+          "nombre": {
             "type": "string"
           },
-          "code": {
+          "telefono": {
             "type": "string"
           },
-          "departmentId": {
-            "type": "string"
-          },
-          "createdAt": {
+          "fechaCreacion": {
             "type": "string",
             "format": "date-time"
           }
         }
       },
-      "Class": {
+      "Product": {
         "type": "object",
         "properties": {
           "id": {
             "type": "string"
           },
-          "name": {
+          "nombre": {
             "type": "string"
           },
-          "subjectId": {
+          "margenLocal": {
             "type": "string"
           },
-          "teacherId": {
+          "margenViaje": {
             "type": "string"
           },
-          "inviteCode": {
-            "type": "string"
-          },
-          "capacity": {
+          "stockDisponible": {
             "type": "integer"
           },
-          "description": {
+          "costoUnitarioReal": {
             "type": "string"
           },
-          "status": {
-            "type": "string"
-          },
-          "createdAt": {
+          "fechaCreacion": {
             "type": "string",
             "format": "date-time"
           }

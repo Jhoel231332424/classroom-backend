@@ -169,6 +169,11 @@ router.post("/", async (req, res) => {
             stockDisponible: stockDisponible || 0,
         }).returning();
 
+        if (!newProduct) {
+            res.status(500).json({ error: "No se pudo crear el producto" });
+            return;
+        }
+
         res.status(201).json({
             ...newProduct,
             margenLocal: Number(newProduct.margenLocal),
@@ -275,7 +280,7 @@ router.put("/:id", async (req, res) => {
             .returning();
 
         if (!updatedProduct) {
-            res.status(404).json({ error: "Producto no encontrado" });
+            res.status(404).json({ error: "Producto no encontrado para actualizar" });
             return;
         }
 

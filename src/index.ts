@@ -5,8 +5,6 @@ import "dotenv/config";
 import swaggerJsDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import usersRouter from "./routes/user.js";
-// import classesRouter from "./routes/classes.js";
-// import subjectsRouter from "./routes/subjects.js";
 import purchasesRouter from "./routes/purchases.js";
 import salesRouter from "./routes/sales.js";
 import productsRouter from "./routes/products.js";
@@ -23,9 +21,9 @@ const swaggerOptions = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "Classroom API",
+      title: "Sistema de Inventario Comercial API",
       version: "1.0.0",
-      description: "API para el sistema de gestión de aulas",
+      description: "API para la gestión de inventario, compras y ventas",
     },
     servers: [
       {
@@ -53,17 +51,13 @@ app.use(express.json());
 
 app.use(securityMiddleware);
 
-// app.use("/api/subjects", subjectsRouter);
+// Rutas
 app.use("/api/users", usersRouter);
-// app.use("/api/classes", classesRouter);
 app.use("/api/purchases", purchasesRouter);
 app.use("/api/sales", salesRouter);
 app.use("/api/products", productsRouter);
 app.use("/api/providers", providersRouter);
 app.use("/api/dashboard", dashboardRouter);
-// app.use("/api/departments", departmentsRouter);
-// app.use("/api/stats", statsRouter);
-// app.use("/api/enrollments", enrollmentsRouter);
 
 app.get("/", (req, res) => {
   res.send("Backend server is running!");

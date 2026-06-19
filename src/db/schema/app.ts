@@ -1,149 +1,122 @@
 import { relations } from "drizzle-orm";
 import {
     integer,
-    jsonb,
-    index,
     pgEnum,
     pgTable,
     text,
     timestamp,
+    decimal,
     varchar,
 } from "drizzle-orm/pg-core";
-import { user } from "./auth.js";
 
-const timestamps = {
+export const saleModeEnum = pgEnum("sale_mode", ["local", "viaje"]);
+export const saleStatusEnum = pgEnum("sale_status", ["pendiente", "confirmada"]);
+
+export const providers = pgTable("providers", {
+    id: varchar("id", { length: 128 }).primaryKey(),
+    name: varchar("name", { length: 255 }).notNull(),
+    phone: varchar("phone", { length: 50 }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at")
-        .defaultNow()
-        .$onUpdate(() => new Date())
-        .notNull(),
-};
-
-export const classStatusEnum = pgEnum("class_status", [
-    "active",
-    "inactive",
-    "archived",
-]);
-
-export const departments = pgTable("departments", {
-    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-    code: varchar("code", { length: 50 }).notNull().unique(),
-    name: varchar("name", { length: 255 }).notNull(),
-    description: text("description"),
-
-    ...timestamps,
 });
 
-export const subjects = pgTable("subjects", {
-    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const products = pgTable("products", {
+    id: varchar("id", { length: 128 }).primaryKey(),
+    name: varchar("name", { length: 255 }).notNull(),
+    localMargin: decimal("margen_local", { precision: 10, scale: 2 }).notNull(),
+    travelMargin: decimal("margen_viaje", { precision: 10, scale: 2 }).notNull(),
+    availableStock: integer("stock_disponible").default(0).notNull(),
+    realUnitCost: decimal("costo_unitario_real", { precision: 15, scale: 4 }).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+});
 
-    departmentId: integer("department_id")
+export const purchases = pgTable("purchases", {
+    id: varchar("id", { length: 128 }).primaryKey(),
+    productId: varchar("producto_id", { length: 128 })
         .notNull()
-        .references(() => departments.id, { onDelete: "restrict" }),
-
-    name: varchar("name", { length: 255 }).notNull(),
-    code: varchar("code", { length: 50 }).notNull().unique(),
-    description: text("description"),
-
-    ...timestamps,
+        .references(() => products.id),
+    providerId: varchar("proveedor_id", { length: 128 })
+        .notNull()
+        .references(() => providers.id),
+    boxTotalCost: decimal("costo_total_caja", { precision: 15, scale: 2 }).notNull(),
+    unitsPerBox: integer("unidades_por_caja").notNull(),
+    boxQuantity: integer("cantidad_cajas").notNull(),
+    calculatedUnitCost: decimal("costo_unitario_calculado", { precision: 15, scale: 4 }).notNull(),
+    arrivalDate: timestamp("fecha_ingreso").defaultNow().notNull(),
 });
 
-export const classes = pgTable(
-    "classes",
-    {
-        id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const sales = pgTable("sales", {
+    id: varchar("id", { length: 128 }).primaryKey(),
+    saleMode: saleModeEnum("modo_venta").notNull(),
+    suggestedAmount: decimal("monto_sugerido", { precision: 15, scale: 2 }).notNull(),
+    collectedAmount: decimal("monto_cobrado", { precision: 15, scale: 2 }).notNull(),
+    roundingDifference: decimal("diferencia_redondeo", { precision: 10, scale: 2 }).notNull(),
+    realSaleCost: decimal("costo_real_venta", { precision: 15, scale: 2 }).notNull(),
+    netUtility: decimal("utilidad_neta", { precision: 15, scale: 2 }).notNull(),
+    status: saleStatusEnum("estado").default("pendiente").notNull(),
+    saleDate: timestamp("fecha_venta").defaultNow().notNull(),
+});
 
-        subjectId: integer("subject_id")
-            .notNull()
-            .references(() => subjects.id, { onDelete: "cascade" }),
-        teacherId: text("teacher_id")
-            .notNull()
-            .references(() => user.id, { onDelete: "restrict" }),
+export const saleDetails = pgTable("sale_details", {
+    id: varchar("id", { length: 128 }).primaryKey(),
+    saleId: varchar("venta_id", { length: 128 })
+        .notNull()
+        .references(() => sales.id),
+    productId: varchar("producto_id", { length: 128 })
+        .notNull()
+        .references(() => products.id),
+    quantity: integer("cantidad").notNull(),
+    unitPrice: decimal("precio_unitario", { precision: 15, scale: 2 }).notNull(),
+    subtotal: decimal("subtotal", { precision: 15, scale: 2 }).notNull(),
+});
 
-        inviteCode: varchar("invite_code", { length: 50 }).notNull().unique(),
-        name: varchar("name", { length: 255 }).notNull(),
-        bannerCldPubId: text("banner_cld_pub_id"),
-        bannerUrl: text("banner_url"),
-        capacity: integer("capacity").notNull().default(50),
-        description: text("description"),
-        status: classStatusEnum("status").notNull().default("active"),
-        schedules: jsonb("schedules").$type<Schedule[]>().notNull(),
-
-        ...timestamps,
-    },
-    (table) => ({
-        subjectIdIdx: index("classes_subject_id_idx").on(table.subjectId),
-        teacherIdIdx: index("classes_teacher_id_idx").on(table.teacherId),
-    })
-);
-
-export const enrollments = pgTable(
-    "enrollments",
-    {
-        id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-
-        studentId: text("student_id")
-            .notNull()
-            .references(() => user.id, { onDelete: "cascade" }),
-        classId: integer("class_id")
-            .notNull()
-            .references(() => classes.id, { onDelete: "cascade" }),
-
-        ...timestamps,
-    },
-    (table) => ({
-        studentIdIdx: index("enrollments_student_id_idx").on(table.studentId),
-        classIdIdx: index("enrollments_class_id_idx").on(table.classId),
-        studentClassUnique: index("enrollments_student_class_unique").on(
-            table.studentId,
-            table.classId
-        ),
-    })
-);
-
-export const departmentsRelations = relations(departments, ({ many }) => ({
-    subjects: many(subjects),
+// Relations
+export const providersRelations = relations(providers, ({ many }) => ({
+    purchases: many(purchases),
 }));
 
-export const subjectsRelations = relations(subjects, ({ one, many }) => ({
-    department: one(departments, {
-        fields: [subjects.departmentId],
-        references: [departments.id],
-    }),
-    classes: many(classes),
+export const productsRelations = relations(products, ({ many }) => ({
+    purchases: many(purchases),
+    saleDetails: many(saleDetails),
 }));
 
-export const classesRelations = relations(classes, ({ one, many }) => ({
-    subject: one(subjects, {
-        fields: [classes.subjectId],
-        references: [subjects.id],
+export const purchasesRelations = relations(purchases, ({ one }) => ({
+    product: one(products, {
+        fields: [purchases.productId],
+        references: [products.id],
     }),
-    teacher: one(user, {
-        fields: [classes.teacherId],
-        references: [user.id],
-    }),
-    enrollments: many(enrollments),
-}));
-
-export const enrollmentsRelations = relations(enrollments, ({ one }) => ({
-    student: one(user, {
-        fields: [enrollments.studentId],
-        references: [user.id],
-    }),
-    class: one(classes, {
-        fields: [enrollments.classId],
-        references: [classes.id],
+    provider: one(providers, {
+        fields: [purchases.providerId],
+        references: [providers.id],
     }),
 }));
 
-export type Department = typeof departments.$inferSelect;
-export type NewDepartment = typeof departments.$inferInsert;
+export const salesRelations = relations(sales, ({ many }) => ({
+    details: many(saleDetails),
+}));
 
-export type Subject = typeof subjects.$inferSelect;
-export type NewSubject = typeof subjects.$inferInsert;
+export const saleDetailsRelations = relations(saleDetails, ({ one }) => ({
+    sale: one(sales, {
+        fields: [saleDetails.saleId],
+        references: [sales.id],
+    }),
+    product: one(products, {
+        fields: [saleDetails.productId],
+        references: [products.id],
+    }),
+}));
 
-export type Class = typeof classes.$inferSelect;
-export type NewClass = typeof classes.$inferInsert;
+// Types
+export type Provider = typeof providers.$inferSelect;
+export type NewProvider = typeof providers.$inferInsert;
 
-export type Enrollment = typeof enrollments.$inferSelect;
-export type NewEnrollment = typeof enrollments.$inferInsert;
+export type Product = typeof products.$inferSelect;
+export type NewProduct = typeof products.$inferInsert;
+
+export type Purchase = typeof purchases.$inferSelect;
+export type NewPurchase = typeof purchases.$inferInsert;
+
+export type Sale = typeof sales.$inferSelect;
+export type NewSale = typeof sales.$inferInsert;
+
+export type SaleDetail = typeof saleDetails.$inferSelect;
+export type NewSaleDetail = typeof saleDetails.$inferInsert;

@@ -15,6 +15,13 @@
       "when": 1781720805859,
       "tag": "0001_deep_mister_sinister",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1781840716831,
+      "tag": "0002_blushing_surge",
+      "breakpoints": true
     }
   ]
 }

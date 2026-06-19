@@ -311,6 +311,37 @@
       }
     },
     "/api/providers/{id}": {
+      "get": {
+        "summary": "Obtener un proveedor por ID",
+        "tags": [
+          "Providers"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Datos del proveedor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Provider"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Proveedor no encontrado"
+          }
+        }
+      },
       "put": {
         "summary": "Actualizar un proveedor existente",
         "tags": [
@@ -488,6 +519,37 @@
       }
     },
     "/api/products/{id}": {
+      "get": {
+        "summary": "Obtener un producto por ID",
+        "tags": [
+          "Products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Datos del producto",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Producto no encontrado"
+          }
+        }
+      },
       "put": {
         "summary": "Actualizar un producto existente",
         "tags": [
@@ -617,8 +679,8 @@
             "type": "string",
             "enum": [
               "admin",
-              "teacher",
-              "student"
+              "vendedor",
+              "cajero"
             ]
           },
           "createdAt": {
@@ -655,16 +717,16 @@
             "type": "string"
           },
           "margenLocal": {
-            "type": "string"
+            "type": "number"
           },
           "margenViaje": {
-            "type": "string"
+            "type": "number"
           },
           "stockDisponible": {
             "type": "integer"
           },
           "costoUnitarioReal": {
-            "type": "string"
+            "type": "number"
           },
           "fechaCreacion": {
             "type": "string",

@@ -153,6 +153,45 @@ router.post("/", async (req, res) => {
 /**
  * @swagger
  * /api/providers/{id}:
+ *   get:
+ *     summary: Obtener un proveedor por ID
+ *     tags: [Providers]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Datos del proveedor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Provider'
+ *       404:
+ *         description: Proveedor no encontrado
+ */
+router.get("/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const [provider] = await db.select().from(providers).where(eq(providers.id, id)).limit(1);
+
+        if (!provider) {
+            res.status(404).json({ error: "Proveedor no encontrado" });
+            return;
+        }
+
+        res.json(provider);
+    } catch (error) {
+        console.error("Error en GET /api/providers/:id:", error);
+        res.status(500).json({ error: "Error interno del servidor" });
+    }
+});
+
+/**
+ * @swagger
+ * /api/providers/{id}:
  *   put:
  *     summary: Actualizar un proveedor existente
  *     tags: [Providers]

@@ -18,13 +18,13 @@ const router = Router();
  *         nombre:
  *           type: string
  *         margenLocal:
- *           type: string
+ *           type: number
  *         margenViaje:
- *           type: string
+ *           type: number
  *         stockDisponible:
  *           type: integer
  *         costoUnitarioReal:
- *           type: string
+ *           type: number
  *         fechaCreacion:
  *           type: string
  *           format: date-time
@@ -100,8 +100,16 @@ router.get("/", async (req, res) => {
             .limit(limitPerPage)
             .offset(offset);
 
+        // Convertir strings decimales a números
+        const formattedData = data.map(p => ({
+            ...p,
+            margenLocal: Number(p.margenLocal),
+            margenViaje: Number(p.margenViaje),
+            costoUnitarioReal: Number(p.costoUnitarioReal),
+        }));
+
         res.json({
-            data,
+            data: formattedData,
             pagination: {
                 page: currentPage,
                 limit: limitPerPage,
@@ -161,9 +169,58 @@ router.post("/", async (req, res) => {
             stockDisponible: stockDisponible || 0,
         }).returning();
 
-        res.status(201).json(newProduct);
+        res.status(201).json({
+            ...newProduct,
+            margenLocal: Number(newProduct.margenLocal),
+            margenViaje: Number(newProduct.margenViaje),
+            costoUnitarioReal: Number(newProduct.costoUnitarioReal),
+        });
     } catch (error) {
         console.error("Error en POST /api/products:", error);
+        res.status(500).json({ error: "Error interno del servidor" });
+    }
+});
+
+/**
+ * @swagger
+ * /api/products/{id}:
+ *   get:
+ *     summary: Obtener un producto por ID
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Datos del producto
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Product'
+ *       404:
+ *         description: Producto no encontrado
+ */
+router.get("/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const [product] = await db.select().from(products).where(eq(products.id, id)).limit(1);
+
+        if (!product) {
+            res.status(404).json({ error: "Producto no encontrado" });
+            return;
+        }
+
+        res.json({
+            ...product,
+            margenLocal: Number(product.margenLocal),
+            margenViaje: Number(product.margenViaje),
+            costoUnitarioReal: Number(product.costoUnitarioReal),
+        });
+    } catch (error) {
+        console.error("Error en GET /api/products/:id:", error);
         res.status(500).json({ error: "Error interno del servidor" });
     }
 });
@@ -222,7 +279,12 @@ router.put("/:id", async (req, res) => {
             return;
         }
 
-        res.json(updatedProduct);
+        res.json({
+            ...updatedProduct,
+            margenLocal: Number(updatedProduct.margenLocal),
+            margenViaje: Number(updatedProduct.margenViaje),
+            costoUnitarioReal: Number(updatedProduct.costoUnitarioReal),
+        });
     } catch (error) {
         console.error("Error en PUT /api/products/:id:", error);
         res.status(500).json({ error: "Error interno del servidor" });

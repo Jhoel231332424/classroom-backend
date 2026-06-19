@@ -21,7 +21,7 @@ const router = express.Router();
  *           type: string
  *         role:
  *           type: string
- *           enum: [admin, teacher, student]
+ *           enum: [admin, vendedor, cajero]
  *         createdAt:
  *           type: string
  *           format: date-time

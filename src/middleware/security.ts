@@ -1,7 +1,7 @@
 import { slidingWindow } from "@arcjet/node";
 import type { ArcjetNodeRequest } from "@arcjet/node";
 import type { NextFunction, Request, Response } from "express";
-
+type RateLimitRole = "super_admin" | "admin" | "guest";
 import aj from "../config/arcjet.js";
 
 const securityMiddleware = async (
@@ -21,19 +21,17 @@ const securityMiddleware = async (
         let message: string;
 
         switch (role) {
-            case "admin":
-                limit = 20;
-                message = "Admin request limit exceeded (20 per minute). Slow down!";
+            case "super_admin":
+                limit = 100; // El dueño del SaaS casi no tiene límites
+                message = "Super Admin request limit exceeded. Slow down!";
                 break;
-            case "teacher":
-            case "student":
-                limit = 10;
-                message = "User request limit exceeded (10 per minute). Please wait.";
+            case "admin":
+                limit = 50; // El cliente del SaaS tiene un límite alto para operar su tienda
+                message = "Admin request limit exceeded. Please wait.";
                 break;
             default:
                 limit = 5;
-                message =
-                    "Guest request limit exceeded (5 per minute). Please sign up for higher limits.";
+                message = "Guest request limit exceeded. Please sign up.";
                 break;
         }
 

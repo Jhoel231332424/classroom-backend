@@ -80,7 +80,7 @@ router.get("/", async (req, res) => {
         }
 
         if (role) {
-            filterConditions.push(eq(user.role, String(role)));
+            filterConditions.push(eq(user.role, String(role) as "super_admin" | "admin"));
         }
 
         const whereClause =

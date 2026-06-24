@@ -1,9 +1,3 @@
-type Schedule = {
-    day: string;
-    startTime: string;
-    endTime: string;
-};
-
-type UserRoles = "admin" | "teacher" | "student";
+type UserRoles = "super_admin" | "admin";
 
 type RateLimitRole = UserRoles | "guest";

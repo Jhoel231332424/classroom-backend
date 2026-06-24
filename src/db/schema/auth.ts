@@ -8,7 +8,7 @@ import {
     index,
 } from "drizzle-orm/pg-core";
 
-export const roleEnum = pgEnum("role", ["student", "teacher", "admin"]);
+export const roleEnum = pgEnum("role", ["super_admin", "admin"]);
 
 const timestamps = {
     createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -24,7 +24,7 @@ export const user = pgTable("user", {
     email: text("email").notNull().unique(),
     emailVerified: boolean("email_verified").notNull(),
     image: text("image"),
-    role: roleEnum("role").default("student").notNull(),
+    role: roleEnum("role").default("admin").notNull(),
     imageCldPubId: text("image_cld_pub_id"),
     ...timestamps,
 });

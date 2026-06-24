@@ -22,15 +22,15 @@ const securityMiddleware = async (
 
         switch (role) {
             case "super_admin":
-                limit = 100; // El dueño del SaaS casi no tiene límites
+                limit = 300; // El dueño del SaaS casi no tiene límites
                 message = "Super Admin request limit exceeded. Slow down!";
                 break;
             case "admin":
-                limit = 50; // El cliente del SaaS tiene un límite alto para operar su tienda
+                limit = 200; // El cliente del SaaS tiene un límite alto para operar su tienda
                 message = "Admin request limit exceeded. Please wait.";
                 break;
             default:
-                limit = 5;
+                limit = 100;
                 message = "Guest request limit exceeded. Please sign up.";
                 break;
         }

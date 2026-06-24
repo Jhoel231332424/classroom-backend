@@ -15,6 +15,13 @@
       "when": 1781720805859,
       "tag": "0001_deep_mister_sinister",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782261732422,
+      "tag": "0002_faithful_korath",
+      "breakpoints": true
     }
   ]
 }
